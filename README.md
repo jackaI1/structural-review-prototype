@@ -1,34 +1,77 @@
 # Structural Review Prototype
 
-From permit drawings to a checked load path. This prototype cut a **four-hour** structural review to **ten minutes**, with an engineer verifying every step.
+A confidential prototype that assembles drawing-derived framing into a structural model for gravity-load review with engineer approval.
 
 https://github.com/user-attachments/assets/2c35d8c2-6d67-4bd0-a4c0-d416f84e945b
 
 *The demo uses a fictional house and synthetic data. No real drawings appear.*
 
-## What it does
+## Overview
 
-Residential gravity design starts from a set of architectural drawings. Usually an engineer traces by hand how every roof and floor load travels down to the foundation, then sizes each member along the way. The prototype automates that workflow:
+A residential gravity review starts with drawings that describe framing on
+separate floors. An engineer must connect those depictions, establish a load
+path and check members against the demands transmitted through the structure.
 
-1. **Finds every member.** It extracts the framing linework from the drawing PDFs: trusses, girder trusses, beams, lintels, posts and walls.
-2. **Classifies every depiction.** Different drafters draw the same member in different ways. The program interprets them from the geometry, without relying on labels.
-3. **Builds the house.** Each floor's framing plan is stacked into one 3D structural model.
-4. **Traces the loads.** Roof and floor loads flow member by member down to the foundation, and the totals are checked to balance.
-5. **Tests every member.** Each post and beam is checked against its demand, and failing members are flagged.
-6. **Proposes the fix.** The program suggests a member that passes, and the engineer accepts it in one click.
+The prototype brings drawing interpretation and structural review into one
+workflow. It extracts PDF geometry, assembles a model and presents the
+interpretation for engineer approval before calculations proceed. Results remain
+subject to engineering judgement.
 
-Before any calculation, the engineer reviews and approves the program's interpretation of the drawings. The engineer stays in charge of every result.
+Built during an engineering co-op, this repository is a demonstration only.
+The video recreates the workflow on a fictional house with simplified,
+illustrative values. It is not engineering output.
 
-## Results
+## How it works
 
-- **Four hours to ten minutes** for a residential gravity review.
-- Combines PDF extraction, member interpretation and sizing, with engineer-in-the-loop verification.
+The architecture is described only at the level of general engineering practice:
+
+1. Extract vector geometry from drawing PDFs.
+2. Classify geometric depictions of structural members.
+3. Assemble the floors into a three-dimensional structural model.
+4. Present the interpretation for an engineer to review and approve.
+5. Carry gravity loads down through the structure.
+6. Check members against their calculated demands and present results for review.
+
+The demonstration includes reviewing suggested member changes. An engineer
+remains responsible for accepting the interpretation and the resulting design.
+No implementation modules, internal formats or design tables are published.
+
+## Design decisions and trade-offs
+
+- Engineer approval separates a proposed interpretation from an accepted model.
+  Drawing extraction does not itself establish a correct load path.
+- A combined model connects floors that appear separately in drawings. Model
+  completeness still depends on the engineer's review of the source information.
+- Keeping the implementation confidential limits public reproducibility. This
+  repository provides an architectural account and demonstration, not a runnable
+  engineering tool.
+
+## Results and evaluation
+
+Reported real-world use: a residential gravity review went from four hours to
+ten minutes during on-the-job use, with an engineer verifying the workflow.
+This is a reported workflow measurement, not a public benchmark.
+
+No source, calculation fixtures or automated evaluation suite are available here.
+The fictional video illustrates the sequence of work; it cannot independently
+reproduce or validate the reported timing or engineering results.
 
 ## Why there's no code
 
-I built this prototype during my engineering co-op. The source code, the internal design methods and the project drawings it was developed on are confidential and belong to the firm, so this repository only shows the project. The video recreates the workflow on a fictional house with simplified, illustrative values. It is not engineering output.
+I built this prototype during my engineering co-op. The source code, internal
+design methods and project drawings are confidential and belong to the firm,
+so this repository only shows the project. I am happy to walk through the architecture and design decisions in an
+interview while respecting those confidentiality limits.
 
-## More
+## Limitations
 
-- Other projects with public code are on my [GitHub profile](https://github.com/jackaI1).
-- I'm happy to walk through the architecture and design decisions in an interview.
+There is no installation command, runnable demo package or test suite in this
+repository. The embedded video is the available demonstration. No claims about
+arbitrary drawing compatibility, code compliance or unattended design can be
+verified from the published material.
+
+## Licence
+
+No software implementation or software licence file is distributed here. This
+description does not grant rights to the confidential source or project material.
+Other projects with public code are on my [GitHub profile](https://github.com/jackaI1).
