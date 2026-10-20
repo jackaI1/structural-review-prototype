@@ -2,7 +2,7 @@
 
 A confidential prototype that assembles drawing-derived framing into a structural model for gravity-load review with engineer approval.
 
-https://github.com/user-attachments/assets/2c35d8c2-6d67-4bd0-a4c0-d416f84e945b
+https://github.com/user-attachments/assets/5989fe10-4648-43d8-a047-52337dfc6dc6
 
 *The demo uses a fictional house and synthetic data. No real drawings appear.*
 
