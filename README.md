@@ -48,9 +48,9 @@ No implementation modules, internal formats or design tables are published.
 
 ## Results and evaluation
 
-Reported real-world use: a residential gravity review went from four hours to
-ten minutes during on-the-job use, with an engineer verifying the workflow.
-This is a reported workflow measurement, not a public benchmark.
+Achieved in testing: a residential gravity review went from four hours to ten
+minutes, with an engineer verifying the workflow. This is a reported
+measurement, not a public benchmark.
 
 No source, calculation fixtures or automated evaluation suite are available here.
 The fictional video illustrates the sequence of work; it cannot independently
