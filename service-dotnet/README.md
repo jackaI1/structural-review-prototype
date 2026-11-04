@@ -135,3 +135,9 @@ separately. Tests use real SQLite files, the real parser and subprocesses; HTTP
 tests use an in-process ASP.NET TestServer with no listening port. Test factories
 stop hosts and delete temporary data. Lifecycle tests reap owned Python processes
 on failure paths. GitHub Actions runs both suites and verifies publish output.
+
+## Licence
+
+The independent source, tests and generated synthetic fixture in this directory
+are available under the [MIT licence](LICENSE). It does not cover the original
+co-op prototype or demonstration video.

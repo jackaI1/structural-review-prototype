@@ -103,7 +103,8 @@ setup, curl examples, limits and restart behavior.
 
 ## Licence
 
-The original prototype implementation is not distributed here. No software licence
-file is currently provided for the independent public demo. This description does
-not grant rights to confidential source or project material.
+The independent public implementation and synthetic fixture under `service-dotnet/`
+are [MIT licensed](service-dotnet/LICENSE). The original co-op prototype is not
+distributed here; this licence grants no rights to confidential source or project
+material or to the original demonstration video.
 Other projects with public code are on my [GitHub profile](https://github.com/jackaI1).
