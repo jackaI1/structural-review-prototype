@@ -1,0 +1,82 @@
+%PDF-1.3
+%‚„œ”
+1 0 obj
+<<
+/Producer (pypdf)
+/Title (Synthetic framing workflow fixture)
+/Author (Public demo generator)
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Count 1
+/Kids [ 4 0 R ]
+>>
+endobj
+3 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+4 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 <<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+>>
+>>
+/MediaBox [ 0.0 0.0 612 792 ]
+/Parent 2 0 R
+/Contents <<
+/Length 1292
+>>
+stream
+0.12 0.22 0.30 rg
+BT /F1 20 Tf 48 730 Td (FICTIONAL FRAMING PLAN) Tj ET
+BT /F1 11 Tf 48 705 Td (Synthetic workflow fixture - not for construction) Tj ET
+0.12 0.22 0.30 RG 2 w 90 420 400 220 re S
+0.1 0.5 0.5 RG 5 w 90 530 m 490 530 l S
+BT /F1 12 Tf 260 545 Td (B1 - 4 m) Tj ET
+0.6 0.65 0.7 RG 0.8 w 110 420 m 110 640 l S
+0.6 0.65 0.7 RG 0.8 w 150 420 m 150 640 l S
+0.6 0.65 0.7 RG 0.8 w 190 420 m 190 640 l S
+0.6 0.65 0.7 RG 0.8 w 230 420 m 230 640 l S
+0.6 0.65 0.7 RG 0.8 w 270 420 m 270 640 l S
+0.6 0.65 0.7 RG 0.8 w 310 420 m 310 640 l S
+0.6 0.65 0.7 RG 0.8 w 350 420 m 350 640 l S
+0.6 0.65 0.7 RG 0.8 w 390 420 m 390 640 l S
+0.6 0.65 0.7 RG 0.8 w 430 420 m 430 640 l S
+0.6 0.65 0.7 RG 0.8 w 470 420 m 470 640 l S
+BT /F1 10 Tf 48 370 Td (SYNTHETIC MEMBER SCHEDULE) Tj ET
+BT /F1 10 Tf 48 345 Td (BEAM B1 SPAN_M=4 TRIBUTARY_M=3 LOAD_KPA=2.5) Tj ET
+BT /F1 10 Tf 48 300 Td (Simply supported beam; uniform illustrative gravity load.) Tj ET
+BT /F1 10 Tf 48 280 Td (Expected: w = 7.5 kN/m; M = 15 kN m; R = 15 kN.) Tj ET
+BT /F1 10 Tf 48 240 Td (All interpretation and results require engineer approval.) Tj ET
+BT /F1 10 Tf 48 220 Td (No section selection, load combinations or code checks.) Tj ET
+BT /F1 10 Tf 48 100 Td (Generated from source in engine/make_sample.py. No real project data.) Tj ET
+endstream
+>>
+endobj
+xref
+0 5
+0000000000 65535 f 
+0000000015 00000 n 
+0000000130 00000 n 
+0000000189 00000 n 
+0000000238 00000 n 
+trailer
+<<
+/Size 5
+/Root 3 0 R
+/Info 1 0 R
+>>
+startxref
+1742
+%%EOF
