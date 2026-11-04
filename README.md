@@ -1,6 +1,6 @@
 # Structural Review Prototype
 
-A demonstration of a drawing-to-structural-review workflow, with a separate runnable sample service.
+I built a drawing review prototype because checking how a house carries its weight meant piecing together several floor plans.
 
 ## Overview
 
