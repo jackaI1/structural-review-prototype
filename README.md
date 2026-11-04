@@ -1,110 +1,83 @@
 # Structural Review Prototype
 
-A confidential prototype that assembles drawing-derived framing into a structural model for gravity-load review with engineer approval.
-
-https://github.com/user-attachments/assets/348eca62-70fb-4e97-a164-1fd147c58ca4
-
-*The demo uses a fictional house and synthetic data. No real drawings appear.*
+A demonstration of a drawing-to-structural-review workflow, with a separate runnable sample service.
 
 ## Overview
 
-A residential gravity review starts with drawings that describe framing on
-separate floors. An engineer must connect those depictions, establish a load
-path and check members against the demands transmitted through the structure.
+A house's framing is spread across several drawing sheets. Reviewing gravity
+loads means connecting the floors, following where loads go and checking the
+members that carry them. I built a prototype during an engineering co-op to
+bring those steps together, with an engineer approving the interpreted model
+before calculations continue.
 
-The prototype brings drawing interpretation and structural review into one
-workflow. It extracts PDF geometry, assembles a model and presents the
-interpretation for engineer approval before calculations proceed. Results remain
-subject to engineering judgement.
+This repository shows that project using a fictional house in the video below.
+The original source and drawings belong to the firm and remain confidential.
+For a hands-on example, I added a separate local service: upload the included
+fictional PDF, follow its review status and read the result. It uses simple
+sample calculations, not the original engine.
 
-Built during an engineering co-op, the original prototype is demonstrated by the video only.
-The video recreates the workflow on a fictional house with simplified,
-illustrative values. It is not engineering output.
+## Try the sample service
 
-## How it works
+Use macOS, Linux or WSL with the .NET 8 SDK and Python 3.9 or newer. From the
+repository root:
 
-The architecture is described only at the level of general engineering practice:
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r service-dotnet/engine/requirements.txt
+export Review__Python="$PWD/.venv/bin/python"
+dotnet run --project service-dotnet/Review.Api --urls http://127.0.0.1:5080
+```
 
-1. Extract vector geometry from drawing PDFs.
-2. Classify geometric depictions of structural members.
-3. Assemble the floors into a three-dimensional structural model.
-4. Present the interpretation for an engineer to review and approve.
-5. Carry gravity loads down through the structure.
-6. Check members against their calculated demands and present results for review.
+Open <http://127.0.0.1:5080/swagger> to upload
+`service-dotnet/samples/synthetic-framing.pdf` through `POST /jobs`. Use the returned
+ID with `GET /jobs/{id}` to check progress, then `GET /jobs/{id}/result` to read the
+JSON result. Stop the service with Ctrl-C. The [service guide](service-dotnet/README.md)
+has command-line examples, settings, tests and restart behavior.
 
-The demonstration includes reviewing suggested member changes. An engineer
-remains responsible for accepting the interpretation and the resulting design.
-No implementation modules, internal formats or design tables are published.
+## What the sample does
 
-## Design decisions and trade-offs
+I can use the service to try the upload-and-review sequence without the
+confidential prototype. It keeps queued work and finished results in a local
+database, so restarting it doesn't lose the queue. One worker passes each PDF
+to a Python script and stores the result.
 
-- Engineer approval separates a proposed interpretation from an accepted model.
-  Drawing extraction does not itself establish a correct load path.
-- A combined model connects floors that appear separately in drawings. Model
-  completeness still depends on the engineer's review of the source information.
-- Keeping the implementation confidential limits public reproducibility. This
-  repository provides an architectural account and demonstration, not a runnable
-  engineering tool.
+The script reads explicit beam annotations in the fictional drawing and
+calculates illustrative loads, moments and reactions. It does not recognise
+arbitrary framing, select member sizes or check building codes. Drawings without
+the sample annotations return a warning instead of invented members. Keep this
+unauthenticated demo on the local machine and use synthetic or public files.
 
-## Results and evaluation
+[Service design](docs/review-service.md) explains the queue, file handling and
+process limits. The service's source and tests are public; every result still
+requires engineer review.
 
-Achieved in testing: a residential gravity review went from four hours to ten
-minutes, with an engineer verifying the workflow. This is a reported
-measurement, not a public benchmark.
+## Original prototype demo
 
-The original prototype source, calculation fixtures and evaluation suite are not available here.
-The independent public service below has its own synthetic fixtures and automated tests.
-The fictional video illustrates the sequence of work; it cannot independently
-reproduce or validate the reported timing or engineering results.
+https://github.com/user-attachments/assets/348eca62-70fb-4e97-a164-1fd147c58ca4
 
-## Why there's no code
+The video uses a fictional house and simplified values. It shows drawing
+geometry being assembled into a model, an engineer reviewing the interpretation,
+gravity loads being carried through the floors, and suggested member changes
+being reviewed. It is not engineering output.
 
-I built this prototype during my engineering co-op. The source code, internal
-design methods and project drawings are confidential and belong to the firm,
-so this repository only demonstrates that original project. I am happy to walk through the architecture and design decisions in an
-interview while respecting those confidentiality limits.
+In testing of the original prototype, a residential gravity review went from
+four hours to ten minutes with an engineer verifying the workflow. That is a
+reported measurement. The video and separate sample service cannot reproduce
+or validate it, and the confidential calculation methods are not published here.
 
-## Limitations
+## Tests
 
-The embedded video demonstrates the original prototype. The independent public
-service below is runnable and tested, but its synthetic engine does not implement
-the original structural workflow. No claims about
-arbitrary drawing compatibility, code compliance or unattended design can be
-verified from the published material.
+```sh
+.venv/bin/python -m unittest discover -s service-dotnet/engine -v
+REVIEW_TEST_PYTHON="$PWD/.venv/bin/python" dotnet test service-dotnet/Review.sln --disable-build-servers
+```
 
-## Public .NET workflow demo
-
-[`service-dotnet/`](service-dotnet/README.md) is a new, independent public example:
-an ASP.NET Core 8 minimal API accepts a drawing PDF, queues review work in SQLite
-via EF Core, calls a Python subprocess, and exposes polling and JSON results.
-Swagger documents the endpoints. It includes a generated fictional framing plan,
-xUnit integration tests and Python tests, run by GitHub Actions.
-
-The Python demo reads explicit synthetic schedule annotations and computes
-illustrative uniform-load beam demands. It does not reproduce the confidential
-engine, interpret arbitrary framing geometry, select sections or check code
-compliance. Every result requires engineer approval. See the linked guide for
-setup, curl examples, limits and restart behavior.
-
-## Skills demonstrated
-
-- **C# / ASP.NET Core 8:** PDF upload, asynchronous review status and JSON result
-  endpoints in [`JobEndpoints.cs`](service-dotnet/Review.Api/JobEndpoints.cs).
-- **EF Core / SQLite:** durable job state and restart recovery in
-  [`JobsDb.cs`](service-dotnet/Review.Api/JobsDb.cs) and
-  [`ReviewWorker.cs`](service-dotnet/Review.Api/ReviewWorker.cs).
-- **Python interoperability:** bounded subprocess execution, cancellation and
-  cleanup in [`PythonEngine.cs`](service-dotnet/Review.Api/PythonEngine.cs), calling
-  the independent [`review.py`](service-dotnet/engine/review.py).
-- **OpenAPI, xUnit and CI:** Swagger configuration in
-  [`Program.cs`](service-dotnet/Review.Api/Program.cs), real HTTP/SQLite/Python
-  [integration tests](service-dotnet/Review.Api.Tests), and
-  [GitHub Actions](.github/workflows/test.yml).
+These tests cover the public service and fictional inputs, including queue
+recovery, invalid uploads and stopping the Python process. They do not validate
+the confidential prototype.
 
 ## Licence
 
-The independent public implementation and synthetic fixture under `service-dotnet/`
-are [MIT licensed](service-dotnet/LICENSE). The original co-op prototype is not
-distributed here; this licence grants no rights to confidential source or project
-material or to the original demonstration video.
-Other projects with public code are on my [GitHub profile](https://github.com/jackaI1).
+The independent code and synthetic fixture under `service-dotnet/` are
+[MIT licensed](service-dotnet/LICENSE). That licence grants no rights to the
+original co-op prototype, confidential material or demonstration video.
