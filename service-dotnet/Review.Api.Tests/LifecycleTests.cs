@@ -94,6 +94,39 @@ public class LifecycleTests
     }
 
     [Fact]
+    public async Task Exited_parent_cannot_leave_a_pipe_holding_descendant_alive()
+    {
+        using var scratch = new Scratch();
+        var pidFile = Path.Combine(scratch.Path, "descendant-pid");
+        var script = scratch.WriteScript("import subprocess,sys\nfrom pathlib import Path\nchild=subprocess.Popen([sys.executable,'-c','import time;time.sleep(60)'])\nPath(" + JsonSerializer.Serialize(pidFile) + ").write_text(str(child.pid))\nprint('{}')\n");
+        var engine = new PythonEngine(new ReviewOptions { Python = Python, EngineScript = script, TimeoutSeconds = 2 }, NullLogger<PythonEngine>.Instance);
+        var running = engine.RunAsync("unused.pdf", CancellationToken.None);
+        Process? descendant = null;
+        try
+        {
+            using var startup = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            while (!File.Exists(pidFile)) await Task.Delay(10, startup.Token);
+            descendant = Process.GetProcessById(int.Parse(await File.ReadAllTextAsync(pidFile, startup.Token)));
+            var started = descendant.StartTime;
+            var error = await Assert.ThrowsAsync<EngineException>(() => running);
+            Assert.Equal("engine_timeout", error.Code);
+            var deadline = Stopwatch.StartNew();
+            while (!descendant.HasExited && deadline.Elapsed < TimeSpan.FromSeconds(2)) await Task.Delay(10);
+            Assert.True(descendant.HasExited, $"Owned descendant PID {descendant.Id}, started {started:o}, survived parent exit");
+        }
+        finally
+        {
+            if (descendant is not null)
+            {
+                if (!descendant.HasExited) descendant.Kill(entireProcessTree: true);
+                await descendant.WaitForExitAsync();
+                descendant.Dispose();
+            }
+            try { await running; } catch (Exception) { }
+        }
+    }
+
+    [Fact]
     public async Task Queued_and_interrupted_jobs_recover_and_results_survive_restart()
     {
         using var scratch = new Scratch();

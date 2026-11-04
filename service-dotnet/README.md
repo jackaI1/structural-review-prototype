@@ -12,7 +12,7 @@ geometry, size members, model load paths or check building codes.
 
 ## Run locally
 
-Prerequisites: .NET **8 SDK**, Python **3.9+**, and a shell. From the repository root:
+Prerequisites: macOS or Linux (including WSL), .NET **8 SDK**, Python **3.9+**, and a shell. From the repository root:
 
 ```sh
 python3 -m venv .venv
@@ -21,8 +21,8 @@ export Review__Python="$PWD/.venv/bin/python"
 dotnet run --project service-dotnet/Review.Api --urls http://127.0.0.1:5080
 ```
 
-On Windows use `.venv\Scripts\python.exe` and PowerShell environment-variable
-syntax. The service runs in the foreground; **Ctrl+C** stops the worker and its
+On Windows use WSL; native Windows process ownership is not implemented.
+The service runs in the foreground; **Ctrl+C** stops the worker and its
 active Python process. Swagger UI is at <http://127.0.0.1:5080/swagger> and the
 OpenAPI document is at `/swagger/v1/swagger.json`.
 
@@ -113,7 +113,9 @@ interrupted `running` jobs. Completed JSON persists across restarts.
 An exclusive file handle prevents two service instances sharing a data directory.
 There is one worker per instance. Pending work resumes after graceful shutdown
 or a crash. Subprocess arguments use `ArgumentList`, without a shell. The runner
-logs owned PID/start time and reaps its process tree on timeout or shutdown.
+logs owned PID/start time. A Python bootstrap starts a dedicated POSIX session;
+the runner terminates that process group on every exit, including when an engine
+parent exits before its descendants. Timeout/shutdown also reap the direct process.
 There is no process sandbox or hard CPU/memory quota: inputs are limited and the
 service is intended for controlled local synthetic use. Database records/results
 have no automatic expiry. Stop the service and remove its data directory to reset

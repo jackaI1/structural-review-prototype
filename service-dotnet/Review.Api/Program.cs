@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Review.Api;
 
+if (!OperatingSystem.IsLinux() && !OperatingSystem.IsMacOS())
+    throw new PlatformNotSupportedException("This demo uses POSIX process groups; run on macOS or Linux (including WSL).");
 var builder = WebApplication.CreateBuilder(args);
 var options = new ReviewOptions();
 builder.Configuration.GetSection("Review").Bind(options);

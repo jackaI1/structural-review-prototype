@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 
@@ -22,6 +23,10 @@ public sealed class PythonEngine(ReviewOptions options, ILogger<PythonEngine> lo
             UseShellExecute = false, RedirectStandardOutput = true,
             RedirectStandardError = true, CreateNoWindow = true,
         };
+        // A dedicated POSIX session owns descendants even if the engine exits
+        // before them. No shell is involved, and engine paths remain arguments.
+        start.ArgumentList.Add("-c");
+        start.ArgumentList.Add("import os,runpy,sys; os.setsid(); script=sys.argv[1]; sys.argv=sys.argv[1:]; runpy.run_path(script,run_name='__main__')");
         start.ArgumentList.Add(options.EngineScript);
         start.ArgumentList.Add(pdfPath);
         start.Environment["PYTHONDONTWRITEBYTECODE"] = "1";
@@ -33,7 +38,7 @@ public sealed class PythonEngine(ReviewOptions options, ILogger<PythonEngine> lo
         {
             process.Start();
             started = true;
-            logger.LogInformation("Owned Python process {Pid}, started {Started:o}; no port; cleanup: kill owned process tree on cancellation", process.Id, process.StartTime.ToUniversalTime());
+            logger.LogInformation("Owned Python process {Pid}, started {Started:o}; no port; cleanup: kill owned process group on every exit", process.Id, process.StartTime.ToUniversalTime());
             output = ReadBoundedAsync(process.StandardOutput, deadline.Token);
             errors = ReadBoundedAsync(process.StandardError, deadline.Token);
             // Observe each pipe independently so EOF on one cannot hide a fault
@@ -64,6 +69,9 @@ public sealed class PythonEngine(ReviewOptions options, ILogger<PythonEngine> lo
         {
             if (started)
             {
+                // The group survives a departed session leader. Always terminate
+                // it, including after successful output, to release every child.
+                KillProcessGroup(-process.Id, 9);
                 if (!process.HasExited) process.Kill(entireProcessTree: true);
                 await process.WaitForExitAsync(CancellationToken.None);
                 deadline.Cancel();
@@ -76,6 +84,9 @@ public sealed class PythonEngine(ReviewOptions options, ILogger<PythonEngine> lo
             }
         }
     }
+
+    [DllImport("libc", EntryPoint = "kill", SetLastError = true)]
+    private static extern int KillProcessGroup(int pid, int signal);
 
     private static async Task<string> ReadBoundedAsync(StreamReader reader, CancellationToken token)
     {
