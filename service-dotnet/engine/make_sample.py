@@ -30,7 +30,7 @@ def make_sample(destination):
         commands.append(f"BT /F1 10 Tf 48 {y} Td ({text}) Tj ET")
     stream = DecodedStreamObject()
     stream.set_data("\n".join(commands).encode("ascii"))
-    page[NameObject("/Contents")] = stream
+    page[NameObject("/Contents")] = writer._add_object(stream)
     writer.add_metadata({"/Title": "Synthetic framing workflow fixture", "/Author": "Public demo generator"})
     with open(destination, "wb") as output:
         writer.write(output)
