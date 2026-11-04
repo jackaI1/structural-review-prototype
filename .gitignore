@@ -1,0 +1,8 @@
+.venv/
+**/bin/
+**/obj/
+**/TestResults/
+**/__pycache__/
+service-dotnet/**/data/
+.superpowers/
+.DS_Store
