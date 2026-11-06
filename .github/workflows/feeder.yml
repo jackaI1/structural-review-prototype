@@ -1,0 +1,37 @@
+name: Feeder monitor
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  sql-server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet test feeder-monitor/Feeder.Core.Tests -c Release
+      - run: dotnet test feeder-monitor/Feeder.Data.Tests -c Release
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet test feeder-monitor/Feeder.Core.Tests -c Release
+      - run: dotnet publish feeder-monitor/Feeder.Desktop -c Release -o "$env:RUNNER_TEMP/feeder"
+      - run: sqllocaldb start MSSQLLocalDB
+      - name: Exercise desktop with FlaUI
+        run: |
+          $env:FEEDER_APP = "$env:RUNNER_TEMP/feeder/Feeder.Desktop.exe"
+          dotnet test feeder-monitor/Feeder.Ui.Tests -c Release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: feeder-windows
+          path: ${{ runner.temp }}/feeder
