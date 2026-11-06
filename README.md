@@ -34,6 +34,16 @@ read the JSON result, a structured text record. Stop the service with Ctrl-C. Th
 [service guide](service-dotnet/README.md) has command-line examples, settings, tests
 and restart behavior.
 
+## Record equipment readings
+
+I can also keep a local log of measurements alongside the drawing review, for example a load reading for a beam. Each entry records the equipment name, measurement, value, unit and time. Start the service as above, then open the interactive request page at <http://127.0.0.1:5080/swagger> and use `POST /readings` with:
+
+```json
+{"equipment":"beam-A","measurement":"load","value":12.5,"unit":"kN","recordedAt":"2026-01-01T12:00:00Z"}
+```
+
+Use `GET /readings?equipment=beam-A` to see its recent entries, or `GET /readings/{id}` for one entry. The list returns at most 500 entries, newest first. The service checks required fields and stores entries in a separate local SQLite file. The readings are an independent log, not calculated structural results. Like the review service, this has no login and should only be used locally with non-sensitive data.
+
 ## What the sample does
 
 I can use the service to try the upload-and-review sequence without the confidential
@@ -72,6 +82,8 @@ and the confidential calculation methods are not published here.
 .venv/bin/python -m unittest discover -s service-dotnet/engine -v
 REVIEW_TEST_PYTHON="$PWD/.venv/bin/python" dotnet test service-dotnet/Review.sln --disable-build-servers
 ```
+
+The automated workflow also runs a Postman collection (a saved set of HTTP requests) with Newman, and checks the OpenAPI description used by the interactive page. The readings tests include concurrent submissions.
 
 These tests cover the public service and fictional inputs, including queue recovery,
 invalid uploads and stopping the Python process. They do not validate the

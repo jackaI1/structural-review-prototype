@@ -1,0 +1,143 @@
+{
+  "info": {
+    "name": "Structural review readings",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:5080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Record load",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/readings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"equipment\": \"beam-A\", \"measurement\": \"load\", \"value\": 12.5, \"unit\": \"kN\", \"recordedAt\": \"2026-01-01T12:00:00Z\"}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"created\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"readingId\", pm.response.json().id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get reading",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/readings/{{readingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"saved value\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().value).to.eql(12.5); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Filter by equipment",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/readings?equipment=beam-A"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"contains reading\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().some(r => r.id === Number(pm.collectionVariables.get(\"readingId\")))).to.be.true; });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reject invalid input",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/readings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"equipment\": \"\", \"measurement\": \"load\", \"value\": 1, \"unit\": \"kN\", \"recordedAt\": \"2026-01-01T12:00:00Z\"}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"invalid request\", () => pm.response.to.have.status(400));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "OpenAPI description",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/swagger/v1/swagger.json"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"describes readings\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().paths).to.have.property(\"/readings\"); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ]
+}
