@@ -24,6 +24,8 @@ var connection = new SqliteConnectionStringBuilder
     DataSource = Path.Combine(options.DataDirectory, "jobs.db"), Pooling = false,
 }.ToString();
 builder.Services.AddDbContext<JobsDb>(db => db.UseSqlite(connection));
+var readingsConnection = new SqliteConnectionStringBuilder { DataSource = Path.Combine(options.DataDirectory, "readings.db"), Pooling = false, DefaultTimeout = 30 }.ToString();
+builder.Services.AddDbContext<ReadingsDb>(db => db.UseSqlite(readingsConnection));
 builder.Services.AddSingleton<PythonEngine>();
 builder.Services.AddHostedService<ReviewWorker>();
 builder.Services.AddProblemDetails();
@@ -39,8 +41,12 @@ app.UseExceptionHandler();
 app.UseSwagger();
 app.UseSwaggerUI();
 using (var scope = app.Services.CreateScope())
+    {
     await scope.ServiceProvider.GetRequiredService<JobsDb>().Database.EnsureCreatedAsync();
+    await scope.ServiceProvider.GetRequiredService<ReadingsDb>().Database.EnsureCreatedAsync();
+}
 app.MapJobs();
+app.MapReadings();
 app.MapGet("/health", () => Results.Ok(new { status = "ok", mode = "synthetic-demo" }));
 await app.RunAsync();
 public partial class Program { }

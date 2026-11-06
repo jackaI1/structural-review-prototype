@@ -31,6 +31,18 @@ jobs:
         run: |
           dotnet publish service-dotnet/Review.Api --configuration Release --no-restore --disable-build-servers --output "$RUNNER_TEMP/review-publish"
           test -f "$RUNNER_TEMP/review-publish/engine/review.py"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run Postman collection
+        run: |
+          npm install --prefix "$RUNNER_TEMP/newman" newman@6.2.1
+          export Review__DataDirectory="$RUNNER_TEMP/review-data"
+          dotnet run --project service-dotnet/Review.Api --configuration Release --no-build --urls http://127.0.0.1:5080 > "$RUNNER_TEMP/api.log" 2>&1 &
+          api_pid=$!
+          trap 'kill "$api_pid" 2>/dev/null || true; wait "$api_pid" 2>/dev/null || true' EXIT
+          for i in {1..60}; do curl -fsS http://127.0.0.1:5080/health >/dev/null && break; sleep 1; done
+          "$RUNNER_TEMP/newman/node_modules/.bin/newman" run service-dotnet/postman/readings.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
