@@ -44,6 +44,20 @@ I can also keep a local log of measurements alongside the drawing review, for ex
 
 Use `GET /readings?equipment=beam-A` to see its recent entries, or `GET /readings/{id}` for one entry. The list returns at most 500 entries, newest first. The service checks required fields and stores entries in a separate local SQLite file. The readings are an independent log, not calculated structural results. Like the review service, this has no login and should only be used locally with non-sensitive data.
 
+## Watch a simulated feeder on Windows
+
+I added a separate feeder monitor to practise watching equipment readings over time alongside the measurement log. It generates fictional voltage, current and breaker states, plots recent current and flags readings outside example limits. These are not readings from the building, and the limits are not engineering advice. Acknowledging an alarm records that it was seen; it does not change the simulated breaker.
+
+On Windows, install the .NET 8 SDK and SQL Server Express LocalDB. From the repository root, run:
+
+```powershell
+dotnet run --project feeder-monitor/Feeder.Desktop
+```
+
+The app connects to the `FeederMonitor` LocalDB database, creates its initial tables, and starts the simulation. Select an alarm and choose **Acknowledge selected** to save its acknowledgement. Close the window to stop the feed. To use another SQL Server instance, set the `FEEDER_SQL` environment variable to its connection string before starting. Use only a trusted local database and synthetic data. The app stores readings in its own database; it does not read the service log or alter structural calculations.
+
+The default limits are 108–132 V and 100 A, or an open breaker. The chart shows up to 120 recent current values; older data stays in SQL Server. There is no automatic retention policy. The database uses an initial schema created on first run, not migrations; remove the demo database before changing its schema.
+
 ## What the sample does
 
 I can use the service to try the upload-and-review sequence without the confidential
@@ -82,6 +96,8 @@ and the confidential calculation methods are not published here.
 .venv/bin/python -m unittest discover -s service-dotnet/engine -v
 REVIEW_TEST_PYTHON="$PWD/.venv/bin/python" dotnet test service-dotnet/Review.sln --disable-build-servers
 ```
+
+The feeder monitor uses a background simulator, a view model that exposes data and commands to the Windows interface, and Entity Framework Core to save records in SQL Server. Its tests cover alarm rules, view model updates, SQL Server storage in a container, and a Windows UI automation check. A Windows workflow builds and publishes the app, while a Linux workflow runs the container test.
 
 The automated workflow also runs a Postman collection (a saved set of HTTP requests) with Newman, and checks the OpenAPI description used by the interactive page. The readings tests include concurrent submissions.
 
