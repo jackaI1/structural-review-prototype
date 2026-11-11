@@ -90,12 +90,50 @@ hours to ten minutes with an engineer verifying the workflow. That is a reported
 measurement. The video and separate sample service cannot reproduce or validate it,
 and the confidential calculation methods are not published here.
 
+## Check a concrete beam and a masonry wall
+
+I added two member checks because the prototype should check more of a building than
+the loads that reach each member. One checks a reinforced concrete beam for bending and
+shear. The other checks a masonry wall for axial load and bending. Each check takes a
+short file of sizes, strengths and loads, and prints a result with a hand-calculation
+sheet. The sheet lists every formula, the numbers put into it and each factor, so
+someone can check any line with a calculator.
+
+I wrote them from the textbook forms of the concrete and masonry design rules. I did not
+have a licensed copy of CSA A23.3 or CSA S304, so every constant is printed in the sheet
+for an engineer to compare with the standard. Nothing here is for design until that is
+done.
+
+To try the two examples, run this from the repository root. No extra packages are needed:
+
+```sh
+python3 service-dotnet/engine/design_check.py rc-beam service-dotnet/engine/examples/rc-beam-b1.json
+python3 service-dotnet/engine/design_check.py masonry-wall service-dotnet/engine/examples/masonry-wall-w1.json --out wall.md
+```
+
+The beam example is a 300 by 500 mm beam with three bars and two-legged stirrups. The
+wall example is a 190 mm block wall, 2.8 m high. The finished sheets are in
+[`docs/design-sheets/`](docs/design-sheets/rc-beam-b1.md) and
+[`docs/design-sheets/masonry-wall-w1.md`](docs/design-sheets/masonry-wall-w1.md). To check
+your own member, copy an example file, change its numbers and run the same command.
+
+If an input is outside the range the check supports, the sheet says **Not sized** and
+gives no result, for example a concrete strength of 15 MPa or a slender wall. The
+command ends with exit code 3 in that case, so a script can tell it apart from a failing
+design. Both checks ignore some things, such as continuous beams, hollow blocks and shear
+walls. [The method note](docs/design-checks.md) lists every formula and limit.
+
+These checks are separate from the sample service above, which still does not check
+building codes.
+
 ## Tests
 
 ```sh
 .venv/bin/python -m unittest discover -s service-dotnet/engine -v
 REVIEW_TEST_PYTHON="$PWD/.venv/bin/python" dotnet test service-dotnet/Review.sln --disable-build-servers
 ```
+
+The concrete beam and masonry wall tests compare results with values I worked out by hand, and fail if the committed design sheets stop matching the code. They run in the same unittest command above.
 
 The feeder monitor uses a background simulator, a view model that exposes data and commands to the Windows interface, and Entity Framework Core to save records in SQL Server. Its tests cover alarm rules, view model updates, SQL Server storage in a container, and a Windows UI automation check. A Windows workflow builds and publishes the app, while a Linux workflow runs the container test.
 
